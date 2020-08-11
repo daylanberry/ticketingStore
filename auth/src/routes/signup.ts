@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
-import { body, validationResult } from 'express-validator'
-import { RequestValidationError } from '../errors/request-validation-error'
+import { body } from 'express-validator'
 import jwt from 'jsonwebtoken'
 
+import { validateRequest } from '../middlewares/validate-request'
 import { User } from '../models/user'
 import { BadRequestError } from '../errors/bad-request-error'
 
@@ -17,43 +17,36 @@ router.post("/api/users/signup", [
     .isLength({ min: 4, max: 20})
     .withMessage('Password must be betwen 4 and 20 characters long')
 ],
+  validateRequest,
 
-async (req: Request, res: Response) => {
-  const errors = validationResult(req);
+  async (req: Request, res: Response) => {
 
-  if (!errors.isEmpty()) {
-    throw new RequestValidationError(errors.array());
-  }
+    const { email, password } = req.body;
+    const existingUser = await User.findOne({ email });
 
-  const { email, password } = req.body;
-  const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new BadRequestError('Email in use')
+    }
 
-  if (existingUser) {
-    throw new BadRequestError('Email in use')
-  }
+    const user = User.build({ email, password })
 
-  const user = User.build({ email, password })
+    await user.save();
 
-  await user.save();
+    // generate JWT
+    const userJwt = jwt.sign(
+      {
+        id: user.id,
+        email: user.email
+      },
+      process.env.JWT_KEY!
+    )
 
-  // generate JWT
-  if (process.env.JWT_KEY) {
-    throw new Error('No secret key')
-  }
-  const userJwt = jwt.sign(
-    {
-      id: user.id,
-      email: user.email
-    },
-    process.env.JWT_KEY
-  )
+    // Store on session object
+    req.session = {
+      jwt: userJwt
+    }
 
-  // Store on session object
-  req.session = {
-    jwt: userJwt
-  }
-
-  res.status(200).send(user)
+    res.status(200).send(user)
 
 });
 
