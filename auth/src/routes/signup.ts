@@ -37,9 +37,21 @@ async (req: Request, res: Response) => {
   await user.save();
 
   // generate JWT
-
+  if (process.env.JWT_KEY) {
+    throw new Error('No secret key')
+  }
+  const userJwt = jwt.sign(
+    {
+      id: user.id,
+      email: user.email
+    },
+    process.env.JWT_KEY
+  )
 
   // Store on session object
+  req.session = {
+    jwt: userJwt
+  }
 
   res.status(200).send(user)
 
