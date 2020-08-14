@@ -8,14 +8,14 @@ const start = async () => {
   }
 
   if (!process.env.MONGO_URI) {
-    throw new Error('Must have mongo URI')
+    throw new Error('Mongo Uri must be defined')
   }
 
   try {
     await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useCreateIndex: true
+      useCreateIndex: true,
     });
 
     console.log('connected to mongo db')
