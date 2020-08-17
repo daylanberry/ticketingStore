@@ -27,7 +27,6 @@ async (req: Request, res: Response) => {
   })
 
   await ticket.save()
-  console.log(ticket)
 
   res.status(201).send(ticket)
 })
