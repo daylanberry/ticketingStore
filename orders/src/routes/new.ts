@@ -10,6 +10,8 @@ import {
 import { body } from 'express-validator';
 import { Ticket } from '../../models/ticket';
 import { Order } from '../../models/order'
+import { natsWrapper } from '../nats-wrapper'
+import { OrderCreatedPublisher } from '../events/publishers/order-created-publisher'
 
 const router = express.Router();
 
@@ -35,7 +37,7 @@ router.post('/api/orders', requireAuth, [
     }
 
     // Make sure that this ticket is not already reserved
-    const isReserved = ticket.isReserved()
+    const isReserved = await ticket.isReserved()
     if (isReserved) {
       throw new BadRequestError('Ticket is already reserved')
     }
@@ -55,8 +57,21 @@ router.post('/api/orders', requireAuth, [
     await order.save()
 
     // publish an event saying an order was created
+    new OrderCreatedPublisher(natsWrapper.client).publish({
+      id: order.id,
+      status: order.status,
+      userId: order.userId,
+      expiresAt: order.expiresAt.toISOString(),
+      ticket: {
+        id: ticket.id,
+        price: ticket.price
+      }
+
+    })
+
 
     res.status(201).send(order);
+
   });
 
 export { router as newOrderRouter };

@@ -14,11 +14,16 @@
       "./src/test/setup.ts"
     ]
   },
+  "config": {
+    "mongodbMemoryServer": {
+      "version": "latest"
+    }
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@dbtickets/common": "^1.0.14",
+    "@dbtickets/common": "^1.0.15",
     "@types/cookie-session": "^2.0.41",
     "@types/express": "^4.17.7",
     "@types/jsonwebtoken": "^8.5.0",
