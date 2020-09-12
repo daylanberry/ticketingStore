@@ -8,8 +8,8 @@ import {
   BadRequestError
 } from '@dbtickets/common';
 import { body } from 'express-validator';
-import { Ticket } from '../../models/ticket';
-import { Order } from '../../models/order'
+import { Ticket } from '../models/ticket';
+import { Order } from '../models/order'
 import { natsWrapper } from '../nats-wrapper'
 import { OrderCreatedPublisher } from '../events/publishers/order-created-publisher'
 
@@ -59,6 +59,7 @@ router.post('/api/orders', requireAuth, [
     // publish an event saying an order was created
     new OrderCreatedPublisher(natsWrapper.client).publish({
       id: order.id,
+      version: order.version,
       status: order.status,
       userId: order.userId,
       expiresAt: order.expiresAt.toISOString(),
