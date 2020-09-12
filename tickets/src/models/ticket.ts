@@ -5,7 +5,7 @@ import { TicketCreatedPublisher } from '../events/publishers/ticket-created-publ
 interface TicketAttrs {
   title: string;
   price: number;
-  userId: string
+  userId: string;
 };
 
 interface TicketDoc extends mongoose.Document {
