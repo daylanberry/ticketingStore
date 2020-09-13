@@ -1,8 +1,8 @@
 import request from "supertest";
 import { app } from "../../app";
 import mongoose from "mongoose";
-import { Order } from '../../../models/order'
-import { Ticket } from '../../../models/ticket'
+import { Order } from '../../models/order'
+import { Ticket } from '../../models/ticket'
 import { OrderStatus } from '@dbtickets/common'
 import { natsWrapper } from '../../nats-wrapper'
 
@@ -20,7 +20,8 @@ it("returns an error if the ticket does not exist", async () => {
 it("returns an error if the ticket is already reserved", async () => {
   const ticket = Ticket.build({
     title: 'concert',
-    price: 20
+    price: 20,
+    id: mongoose.Types.ObjectId().toHexString()
   })
 
   await ticket.save();
@@ -48,6 +49,7 @@ it("reserves a ticket", async () => {
   const ticket = Ticket.build({
     title: "concert",
     price: 20,
+    id: mongoose.Types.ObjectId().toHexString()
   });
 
   await ticket.save();
@@ -65,6 +67,7 @@ it('emits an order created event', async() => {
   const ticket = Ticket.build({
     title: "concert",
     price: 20,
+    id: mongoose.Types.ObjectId().toHexString()
   });
 
   await ticket.save();
