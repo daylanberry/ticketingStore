@@ -1,35 +1,35 @@
-import { Listener, OrderCreatedEvent, Subjects } from '@dbtickets/common';
+import { Listener, OrderCancelledEvent, Subjects } from '@dbtickets/common';
 import { queueGroupName } from './queue-group-name';
 import { Message } from 'node-nats-streaming';
 import { Ticket } from '../../models/ticket';
 import { TicketUpdatedPublisher } from '../publishers/ticket-updated-publisher';
 
-export class OrderCreatedListener extends Listener <OrderCreatedEvent>{
-  readonly subject = Subjects.OrderCreated
+export class OrderCancelledListener extends Listener <OrderCancelledEvent>{
+  readonly subject = Subjects.OrderCancelled;
+
   queueGroupName = queueGroupName;
 
-  async onMessage(data: OrderCreatedEvent['data'], msg: Message) {
+  async onMessage(data: OrderCancelledEvent['data'], msg: Message){
 
     const ticket = await Ticket.findById(data.ticket.id);
 
-    if (!ticket) {
-      throw new Error('Ticket not found')
+    if (!ticket){
+      throw new Error('ticket not found');
     }
 
-    ticket.set({ orderId: data.id })
+    ticket.set({ orderId: undefined });
 
     await ticket.save();
 
     await new TicketUpdatedPublisher(this.client).publish({
       id: ticket.id,
       version: ticket.version,
-      title: ticket.title,
-      price: ticket.price,
+      orderId: ticket.orderId,
       userId: ticket.userId,
-      orderId: ticket.orderId
-    });
+      price: ticket.price,
+      title: ticket.title
+    })
 
-    msg.ack();
-
+    msg.ack()
   }
 }
