@@ -3,16 +3,19 @@ import mongoose from 'mongoose';
 import { app } from '../app';
 import request from 'supertest'
 import jwt from 'jsonwebtoken'
+import { stripeApiKey } from '../../keys'
 
 declare global {
   namespace NodeJS {
     interface Global {
-      signin(): string[]
+      signin(id? : string): string[]
     }
   }
 }
 
 jest.mock('../nats-wrapper');
+
+process.env.STRIPE_KEY = stripeApiKey;
 
 let mongo: any;
 beforeAll(async() => {
@@ -42,10 +45,10 @@ afterAll(async() => {
   await mongoose.connection.close()
 });
 
-global.signin = () => {
+global.signin = (id?: string) => {
   // Build a jwt payload. { id, email }
   const payload = {
-    id: new mongoose.Types.ObjectId().toHexString(),
+    id: id || new mongoose.Types.ObjectId().toHexString(),
     email: 'd@gmail.com'
   }
 
