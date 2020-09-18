@@ -23,7 +23,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@dbtickets/common": "^1.0.22",
+    "@dbtickets/common": "^1.0.23",
     "@types/cookie-session": "^2.0.41",
     "@types/express": "^4.17.7",
     "@types/jsonwebtoken": "^8.5.0",

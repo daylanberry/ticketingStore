@@ -4,6 +4,7 @@ import { Order } from '../../models/order';
 import mongoose from 'mongoose';
 import { OrderStatus } from '@dbtickets/common';
 import { stripe } from '../../stripe';
+import { Payment } from '../../models/payment';
 
 
 it('throws a 404 when an order does not exist', async() => {
@@ -95,7 +96,7 @@ it('returns a 400 when the order is cancelled', async() => {
 // })
 
 
-it('returnn a 204 with valid inputs', async() => {
+it('returns a 201 with valid inputs', async() => {
   const userId = mongoose.Types.ObjectId().toHexString();
   const price = Math.floor(Math.random() * 100000)
 
@@ -126,4 +127,48 @@ it('returnn a 204 with valid inputs', async() => {
 
   expect(stripeCharge).toBeDefined()
   expect(stripeCharge!.currency).toBe('usd')
-})
+});
+
+
+
+
+it('returns a 201 with valid inputs', async() => {
+  const userId = mongoose.Types.ObjectId().toHexString();
+  const price = Math.floor(Math.random() * 100000)
+
+  const order = Order.build({
+    id: mongoose.Types.ObjectId().toHexString(),
+    userId: userId,
+    version: 0,
+    price,
+    status: OrderStatus.Created
+  });
+
+  await order.save()
+
+  await request(app)
+    .post('/api/payments')
+    .set('Cookie', global.signin(userId))
+    .send({
+      token: 'tok_visa',
+      orderId: order.id
+    })
+    .expect(201)
+
+  const stripeCharges = await stripe.charges.list({ limit: 50 });
+
+  const stripeCharge = stripeCharges.data.find(charge => {
+    return charge.amount === price * 100
+  });
+
+  expect(stripeCharge).toBeDefined()
+  expect(stripeCharge!.currency).toBe('usd')
+
+  const payment = await Payment.findOne({
+    orderId: order.id,
+    stripeId: stripeCharge!.id
+  });
+
+  expect(payment).not.toBeNull();
+
+});
