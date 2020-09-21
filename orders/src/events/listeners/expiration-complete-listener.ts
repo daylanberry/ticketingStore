@@ -13,6 +13,7 @@ export class ExpirationCompleteListener extends Listener <ExpirationCompleteEven
   async onMessage(data: ExpirationCompleteEvent['data'], msg: Message) {
     const order = await Order.findById(data.orderId).populate('ticket');
 
+    console.log(order)
     if (!order) {
       throw new Error('Order not found')
     }

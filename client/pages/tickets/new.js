@@ -1,9 +1,25 @@
 import { useState} from 'react';
+import useRequest from '../../hooks/use-request';
+import Router from 'next/router';
 
 const NewTicket = () => {
 
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
+  const { doRequest, errors } = useRequest({
+    url: '/api/tickets',
+    method: 'post',
+    body: {
+      title, price
+    },
+    onSuccess: () => Router.push('/')
+  })
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+
+    doRequest()
+  }
 
   const onBlur = () => {
     const value = parseFloat(price)
@@ -18,7 +34,7 @@ const NewTicket = () => {
   return (
     <div>
       <h2>Create a ticket</h2>
-      <form>
+      <form onSubmit={onSubmit}>
         <div className='form-group'>
           <label>Title</label>
           <input
@@ -34,6 +50,7 @@ const NewTicket = () => {
             onBlur={onBlur}
           />
         </div>
+        {errors}
         <button className='btn btn-primary'>Submit</button>
       </form>
     </div>
