@@ -4,7 +4,7 @@ export default ({ req }) => {
   if (typeof Window === 'undefined') {
     // we're on the server
     return axios.create({
-      baseURL: 'http://ingress-nginx-controller.ingress-nginx.svc.cluster.local',
+      baseURL: 'www.ticketing-prod1234.xyz/',
       headers: req.headers
     });
 
