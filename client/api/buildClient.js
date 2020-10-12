@@ -4,6 +4,7 @@ export default ({ req }) => {
   if (typeof Window === 'undefined') {
     // we're on the server
     return axios.create({
+      // Or use ticketing.dev in production
       baseURL: 'http://www.ticketing-prod1234.xyz',
       headers: req.headers
     });
